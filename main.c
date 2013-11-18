@@ -16,7 +16,10 @@ typedef struct {
 
 } Person;
 
-enum State { New, Work, Move, Gone, Read, Write}
+enum State {New, Work, Move, Gone, Read, Write}
+State state;
+int id;
+double t;
 
 double rand_range(double min, double max) {
 
@@ -38,13 +41,24 @@ double rand_range_ex(int ex, int min, int max) {
 void Person(int new_id) {
   Person person;
   person.id = new_id;
-  person.state = NEW;
+  person.state = New;
 }
 
 void start_working() {
 
-  t = MPI_Wtime() + rand_
+  t = MPI_Wtime() + rand_range(1, 4);
+  state = Work;
 
+}
+
+void Simulate() {
+
+  if(state == Work) {
+    int now = MPI_Wtime();
+    if(t < now) {
+      state = Move;
+    }
+  }
 }
 
 void Elevator(int rank, MPI_Comm) {
