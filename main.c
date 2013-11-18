@@ -16,7 +16,7 @@ typedef struct {
 
 } Person;
 
-enum State {New, Work, Move, Gone, Read, Write}
+enum State {New, Work, Move, Gone, Read, Write};
 State state;
 int id;
 double t;
@@ -60,6 +60,8 @@ void Simulate() {
     }
   }
 }
+
+int 
 
 void Elevator(int rank, MPI_Comm) {
 
