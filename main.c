@@ -41,7 +41,7 @@ double rand_range_ex(int ex, int min, int max) {
 void Person(int new_id) {
   Person person;
   person.id = new_id;
-  person.state = New;
+  state = New;
 }
 
 void start_working() {
