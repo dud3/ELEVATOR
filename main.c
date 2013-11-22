@@ -61,7 +61,15 @@ void Simulate() {
   }
 }
 
-int 
+int next_floor(int current_floor) {
+
+  int random_value = rand() % 2;
+  if(current_floor == 2) return random_value ? 3 : 4;
+  if(current_floor == 3) return random_value ? 2 : 4;
+  if(current_floor == 4) return random_value ? 2 : 3;
+
+}
+
 
 void Elevator(int rank, MPI_Comm) {
 
