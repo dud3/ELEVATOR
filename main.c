@@ -61,7 +61,7 @@ void Simulate() {
   }
 }
 
-int next_floor(int current_floor) {
+int go_to_next_floor(int current_floor) {
 
   int random_value = rand() % 2;
   if(current_floor == 2) return random_value ? 3 : 4;
