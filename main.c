@@ -17,7 +17,6 @@ typedef struct {
 } PersonSt;
 
 enum State {New, Work, Move, Gone, Read, Write};
-enum State state;
 int id;
 double t;
 
@@ -43,22 +42,22 @@ double rand_range_ex(int ex, int min, int max) {
 void Person(int new_id) {
   PersonSt person;
   person.id = new_id;
-  state = New;
+  person.state = New;
 }
 
-void start_working() {
+void start_working(person) {
 
   t = MPI_Wtime() + rand_range(1, 4);
-  state = Work;
+  person.state = Work;
 
 }
 
-void Simulate() {
+void Simulate(person) {
 
-  if (state == Work) {
+  if (person.state == Work) {
     int now = MPI_Wtime();
     if (t < now) {
-      state = Move;
+      person.state = Move;
     }
   }
 }
@@ -83,5 +82,22 @@ void Floor(int rank, MPI_Comm comm) {
 
 int main(int argc, char **argv) {
 
+  int size, rank, root=0;
 
+  MPI_Status Stat;
+  MPI_Init(&argc, &argv);
+
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+  printf("%d/%d started.\n", rank+1, size);
+ 
+  // We see if we are the root process.
+  if (rank == root) {
+    // do root-y stuff
+  }
+ 
+  printf("%d/%d ended.\n", rankp, numtasks);
+
+  MPI_Finalize();
 }
