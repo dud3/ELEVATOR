@@ -14,7 +14,7 @@ typedef struct {
   int id;
   int state;
 
-} PersonSt;
+} Person;
 
 enum State {New, Work, Move, Gone, Read, Write};
 int id;
@@ -39,10 +39,11 @@ double rand_range_ex(int ex, int min, int max) {
 }
 
 
-void Person(int new_id) {
-  PersonSt person;
+Person newPerson(int new_id) {
+  Person person;
   person.id = new_id;
   person.state = New;
+  return person;
 }
 
 void start_working(Person person) {
