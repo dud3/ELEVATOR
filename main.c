@@ -45,14 +45,14 @@ void Person(int new_id) {
   person.state = New;
 }
 
-void start_working(person) {
+void start_working(Person person) {
 
   t = MPI_Wtime() + rand_range(1, 4);
   person.state = Work;
 
 }
 
-void Simulate(person) {
+void Simulate(Person person) {
 
   if (person.state == Work) {
     int now = MPI_Wtime();
@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
     // do root-y stuff
   }
  
-  printf("%d/%d ended.\n", rankp, numtasks);
+  printf("%d/%d ended.\n", rank+1, size);
 
   MPI_Finalize();
 }
