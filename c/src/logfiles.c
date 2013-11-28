@@ -59,9 +59,10 @@ void dumpLog(int whoAreWe, int ourID, char* name, char* msg, int floor) {
 
   char const lfDigit[] = "0123456789";
   char b[] = "0";
+  char c[] = "0";
   char* strID = b;
-  *strID = lfDigit[ourID];
-  char* floorID = b;
+  strID[0] = lfDigit[ourID];
+  char* floorID = c;
   *floorID = lfDigit[floor];
 
   if (whoAreWe == 0) {
