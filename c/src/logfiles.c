@@ -12,7 +12,7 @@ MPI_Status lfStatus;
 MPI_File lfFile;
 MPI_Info lfInfo;
 char *lfName = "./logFile.txt";
-char *lfBuffer;
+char lfBuffer[101];
 
 void createLogFile() {
 
@@ -44,13 +44,16 @@ void dumpLog(int whoAreWe, int ourID, char* name, char* msg, int floor) {
   time(&lfTime); 
 
   char *newBuffer;
-  newBuffer = strcat(strcat(strcpy(lfBuffer, "["), ctime(&lfTime)), "] ");
+  newBuffer = strcpy(lfBuffer, "[");
+  newBuffer = strcat(newBuffer, ctime(&lfTime));
+  newBuffer = strcat(newBuffer, "] ");
 
   char const lfDigit[] = "0123456789";
-  char *strID = "0";
-  strID[0] = lfDigit[ourID];
-  char *floorID = "0";
-  floorID[0] = lfDigit[floor];
+  char b[] = "0";
+  char* strID = b;
+  *strID = lfDigit[ourID];
+  char* floorID = b;
+  *floorID = lfDigit[floor];
 
   if (whoAreWe == 0) {
     newBuffer = strcat(strcat(newBuffer, "Elevator "), strID);
@@ -66,7 +69,7 @@ void dumpLog(int whoAreWe, int ourID, char* name, char* msg, int floor) {
   while (lfBuffer[i] != '\0') {
     i++;
   }
-
+ 
   MPI_File_write(lfFile, lfBuffer, i-1, MPI_CHAR, &lfStatus);
 
   printf("%d/%d did some serious log file writing.\n", lfRank+1, lfSize);
