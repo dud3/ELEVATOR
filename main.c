@@ -112,6 +112,11 @@ int main(int argc, char **argv) {
  
   rc = MPI_File_read(configFile, buf, nameLength, MPI_CHAR, &status);
   buf[nameLength] = '\0';
+  int len = nameLength - 1;
+  while ((len >= 0) && (buf[len] == ' ')) {
+    buf[len] = '\0';
+    len--;
+  }
 
   rc = MPI_File_close(&configFile);
 
