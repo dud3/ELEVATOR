@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
 
   MPI_File configFile;
   MPI_Info info;
-  char *configFileName = "configFile.txt";
+  char *configFileName = "~/ELEVATOR/configFile.txt";
 
   MPI_Status Stat;
   MPI_Init(&argc, &argv);
@@ -106,7 +106,7 @@ int main(int argc, char **argv) {
                      MPI_MODE_RDONLY, info, &configFile);
 
   MPI_Status status;
-  rc = MPI_File_read_ordered(configFile, buf, 1, MPI_CHAR, &status);
+  rc = MPI_File_read_ordered(configFile, buf, 20, MPI_CHAR, &status);
 
   rc = MPI_File_close(&configFile);
 
