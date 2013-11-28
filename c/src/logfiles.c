@@ -46,15 +46,19 @@ void dumpLog(int whoAreWe, int ourID, char* name, char* msg, int floor) {
   lfBuffer = strcat(strcat(strcpy(lfBuffer, "["), ctime(&lfTime)), "] ");
 
   char const lfDigit[] = "0123456789";
+  char *strID = "0";
+  strID[0] = lfDigit[ourID];
+  char *floorID = "0";
+  floorID[0] = lfDigit[floor];
 
   if (whoAreWe == 0) {
-    lfBuffer = strcat(strcat(lfBuffer, "Elevator "), lfDigit[ourID]);
+    lfBuffer = strcat(strcat(lfBuffer, "Elevator "), strID);
   } else {
-    lfBuffer = strcat(strcat(lfBuffer, "Person "), lfDigit[ourID]);
+    lfBuffer = strcat(strcat(lfBuffer, "Person "), strID);
     lfBuffer = strcat(strcat(strcat(lfBuffer, " ("), name), ")");
   }
 
-  lfBuffer = strcat(strcat(strcat(lfBuffer, msg), lfDigit[floor]), ".\n");
+  lfBuffer = strcat(strcat(strcat(lfBuffer, msg), floorID), ".\n");
   
   int i = 0;
   
@@ -62,7 +66,7 @@ void dumpLog(int whoAreWe, int ourID, char* name, char* msg, int floor) {
     i++;
   }
 
-  rc = MPI_File_write(lfFile, lfBuffer, i-1, MPI_CHAR, &lfStatus);
+  MPI_File_write(lfFile, lfBuffer, i-1, MPI_CHAR, &lfStatus);
 
   printf("%d/%d did some serious log file writing.\n", lfRank+1, lfSize);
 
@@ -70,7 +74,7 @@ void dumpLog(int whoAreWe, int ourID, char* name, char* msg, int floor) {
 
 void closeLogFile() {
 
-  rc = MPI_File_close(&lfFile);
+  MPI_File_close(&lfFile);
 
   printf("%d/%d closed their chunk of the log file.\n", lfRank+1, lfSize);
 
