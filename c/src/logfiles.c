@@ -38,10 +38,8 @@ void initLogFile() {
 // whoAreWe .. 0 for elevator, 1 for person
 // ourID .. which number are we
 // floor .. where are we
-void dumpLog(int whoAreWe, int ourID, char* name, char* msg) {
+void dumpLog(int whoAreWe, int ourID, char* name, char* msg, int floor) {
 
-  int floor = 0;
-  
   // what time is it now?
   time_t lfTime;
   time(&lfTime); 
