@@ -106,14 +106,16 @@ int main(int argc, char **argv) {
                      MPI_MODE_RDONLY, info, &configFile);
 
   MPI_Status status;
-  rc = MPI_File_read_ordered(configFile, buf, 20, MPI_CHAR, &status);
+  rc = MPI_File_read(configFile, buf, 20, MPI_CHAR, &status);
 
   rc = MPI_File_close(&configFile);
+
+  printf(buf);
 
   char *ourname = buf;
 
   char str[100];
-  printf(strcat (strcat (strcpy (str, "%d is called "), ourname), ".\n"), rank+1);
+  printf(strcat (strcat (strcpy (str, "%d/%d has the name '"), ourname), "'.\n"), rank+1, size);
 
   // we check whether or not we are the root process
   if (rank == root) {
