@@ -111,7 +111,8 @@ int main(int argc, char **argv) {
 
   char *ourname = buf;
 
-  printf("%d is " + ourname + "\n", rank+1);
+  char str[100];
+  printf(strcat (strcat (strcpy (str, "%d is called "), ourname), ".\n"), rank+1);
 
   // we check whether or not we are the root process
   if (rank == root) {
