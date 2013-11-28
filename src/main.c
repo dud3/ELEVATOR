@@ -7,6 +7,7 @@
 #include <math.h>
 #include <string.h>
 #include "main.h"
+#include "logfiles.h"
 
 const int SECONDS = 10.0;
 double START;
@@ -33,7 +34,11 @@ int main(int argc, char **argv) {
   MPI_Info info;
   char *configFileName = "./configFile.txt";
 
+  createLogFile();
+
   MPI_Init(&argc, &argv);
+  
+  initLogFile();
 
   MPI_Info_create(&info);
 
@@ -76,6 +81,8 @@ int main(int argc, char **argv) {
 	  worker(rank, ourname);
   }
  
+  closeLogFile();
+  
   printf("%d/%d ended.\n", rank+1, size);
 
   MPI_Finalize();
@@ -114,6 +121,8 @@ void master(int rank) {
 			}
 		}
 
+        dumpLog(0, 1, "", " is now on floor ", floor);
+
 		printf("elevator now on floor %d\n", floor);
 		//tell workers what floor we're on
 		MPI_Bcast(&floor, 1, MPI_INT, rank, MPI_COMM_WORLD);
@@ -143,10 +152,12 @@ void worker(int rank, char* name) {
 		MPI_Bcast(&floorOfElevator, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
 		if (state == Elevator) {
+            dumpLog(1, rank, name, " is riding the elevator to floor ", floor);
 			printf("%d is riding the elevator to floor %d\n", rank, desiredFloor);
 			
 			//are we on the right floor? if so, state becomes work
 			if (floorOfElevator == desiredFloor) {
+                dumpLog(1, rank, name, " got off elevator and is now working on floor ", floor);
 				printf("%d got off elevator and is now working on floor %d\n", rank, desiredFloor);
 				state = Work;
 				myFloor = desiredFloor;
@@ -155,10 +166,12 @@ void worker(int rank, char* name) {
 		else if (state == Work) {
 			//do work
 			currWorkTick++;
+            dumpLog(1, rank, name, " did some work on floor ", floor);
 			printf("%d did some work on floor %d [%d/%d]\n", rank, myFloor, currWorkTick, workTicks);
 			
 			//receive our next task and wait for the elevator
 			if (currWorkTick >= workTicks) {
+                dumpLog(1, rank, name, " is done with work on floor ", floor);
 				printf("%d is done with work on floor %d\n", rank, myFloor);
 				currWorkTick = 0;
 				workTicks = rand_num(5);
@@ -167,8 +180,10 @@ void worker(int rank, char* name) {
 			}
 		}
 		else if (state == Waiting) {
+            dumpLog(1, rank, name, " is waiting for the elevator to go to floor ", floor);
 			printf("%d is waiting for the elevator to go to floor %d from floor %d\n", rank, desiredFloor, myFloor);
 			if (floorOfElevator == myFloor) {
+                dumpLog(1, rank, name, " got on the elevator to go to floor ", floor);
 				printf("%d got on the elevator to go to floor %d\n", rank, desiredFloor);
 				state = Elevator;
 			}
