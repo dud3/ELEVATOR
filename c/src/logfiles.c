@@ -5,15 +5,16 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <string.h>
+
+int lfChunkLen = 100, lfSize, lfRank;
+MPI_Status lfStatus;
+MPI_File lfFile;
+MPI_Info lfInfo;
+char *lfName = "./logFile.txt";
+char *lfBuffer;
 
 void createLogFile() {
-
-  int lfChunkLen = 100, lfSize, lfRank;
-
-  MPI_Status lfStatus;
-  MPI_File lfFile = malloc(sizeof lfFile);
-  MPI_Info lfInfo;
-  char *lfName = "./logFile.txt";
 
 }
 
@@ -24,14 +25,12 @@ void initLogFile() {
   MPI_Comm_size(MPI_COMM_WORLD, &lfSize);
   MPI_Comm_rank(MPI_COMM_WORLD, &lfRank);
 
-  printf("%d/%d initialized their chunk of the log file.\n", rank+1, size);
+  printf("%d/%d initialized their chunk of the log file.\n", lfRank+1, lfSize);
 
-  char lfBuffer[lfChunkLen + 1];
+  int rc = MPI_File_open(MPI_COMM_WORLD, lfName,
+                         MPI_MODE_CREATE | MPI_MODE_RDWR, lfInfo, &lfFile);
 
-  rc = MPI_File_open(MPI_COMM_WORLD, lfName,
-                     MPI_MODE_CREATE | MPI_MODE_RDWR, lfInfo, &lfFile);
-
-  printf("%d/%d achieved the file_open result %d for their chunk of the log file.\n", rank+1, size, rc);
+  printf("%d/%d achieved the file_open result %d for their chunk of the log file.\n", lfRank+1, lfSize, rc);
 
 }
 
