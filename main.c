@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <string.h>
 
 const int SECONDS = 10.0;
 double START;
@@ -87,7 +88,7 @@ int main(int argc, char **argv) {
 
   MPI_File configFile;
   MPI_Info info;
-  char *configFileName = "configFile";
+  char *configFileName = "configFile.txt";
 
   MPI_Status Stat;
   MPI_Init(&argc, &argv);
