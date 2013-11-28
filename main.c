@@ -83,19 +83,38 @@ void Floor(int rank, MPI_Comm comm) {
 
 int main(int argc, char **argv) {
 
-  int size, rank, root=0;
+  int size, rank, rc, root=0;
+
+  MPI_File configFile;
+  MPI_Info info;
+  char *configFileName = "configFile";
 
   MPI_Status Stat;
   MPI_Init(&argc, &argv);
+
+  MPI_Info_create(&info);
 
   MPI_Comm_size(MPI_COMM_WORLD, &size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   printf("%d/%d started.\n", rank+1, size);
- 
-  // We see if we are the root process.
+
+  char buf[20];
+
+  rc = MPI_File_open(MPI_COMM_WORLD, configFileName,
+                     MPI_MODE_RDONLY, info, &configFile);
+
+  rc = MPI_File_read_ordered(configFile, buf, 1, MPI_CHAR, &status);
+
+  rc = MPI_File_close(&configFile);
+
+  char *ourname = buf;
+
+  printf("%d is " + ourname + "\n", rank+1);
+
+  // we check whether or not we are the root process
   if (rank == root) {
-    // do root-y stuff
+    // we do root-y stuff =)
   }
  
   printf("%d/%d ended.\n", rank+1, size);
