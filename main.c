@@ -100,7 +100,7 @@ int main(int argc, char **argv) {
 
   printf("%d/%d started.\n", rank+1, size);
 
-  char buf[20];
+  char buf[21];
 
   rc = MPI_File_open(MPI_COMM_WORLD, configFileName,
                      MPI_MODE_RDONLY, info, &configFile);
@@ -108,10 +108,8 @@ int main(int argc, char **argv) {
   // Set the individual pointer to 0
   rc = MPI_File_seek(configFile, 0, MPI_SEEK_SET);
  
-  // Read nothing (check status)
-  MPI_Status status;
-  memset(&status, 0xff, sizeof(MPI_Status));
-  rc = MPI_File_read(configFile, buf, 20, MPI_CHAR, &status);
+  rc = MPI_File_read(configFile, buf, 20, MPI_CHAR, MPI_STATUS_IGNORE);
+  buf[20] = '\0';
 
   rc = MPI_File_close(&configFile);
 
