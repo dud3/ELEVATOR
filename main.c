@@ -110,7 +110,7 @@ int main(int argc, char **argv) {
 
   rc = MPI_File_close(&configFile);
 
-  printf(buf);
+  printf(&buf);
 
   char *ourname = buf;
 
