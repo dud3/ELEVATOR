@@ -7,12 +7,11 @@
 #include <math.h>
 #include <string.h>
 
-int lfChunkLen = 100, lfSize, lfRank;
+int lfChunkLen = 100, lfSize, lfRank, lfPos = 0;
 MPI_Status lfStatus;
 MPI_File lfFile;
 MPI_Info lfInfo;
 char *lfName = "./logFile.txt";
-char lfBuffer[101];
 
 void createLogFile() {
 
@@ -41,11 +40,21 @@ void dumpLog(int whoAreWe, int ourID, char* name, char* msg, int floor) {
 
   // what time is it now?
   time_t lfTime;
-  time(&lfTime); 
+  time(&lfTime);
+  char lfStrTime[1000];
+  struct tm * p = localtime(&lfTime);
+  strftime(lfStrTime, 1000, "%c", p);
+
+  char lfBuffer[lfChunkLen+1];
+
+  for (int i = 0; i < lfChunkLen; i++) {
+    lfBuffer[i] = ' ';
+  }
 
   char *newBuffer;
   newBuffer = strcpy(lfBuffer, "[");
-  newBuffer = strcat(newBuffer, ctime(&lfTime));
+  newBuffer = strcat(newBuffer, lfStrTime);
+  // newBuffer = strcat(newBuffer, ctime(&lfTime));
   newBuffer = strcat(newBuffer, "] ");
 
   char const lfDigit[] = "0123456789";
@@ -62,15 +71,24 @@ void dumpLog(int whoAreWe, int ourID, char* name, char* msg, int floor) {
     newBuffer = strcat(strcat(strcat(newBuffer, " ("), name), ")");
   }
 
-  strcat(strcat(strcat(newBuffer, msg), floorID), ".\n");
+  strcat(strcat(strcat(newBuffer, msg), floorID), ".");
   
   int i = 0;
-  
   while (lfBuffer[i] != '\0') {
-    i++;
+    i += 1;
   }
- 
-  MPI_File_write(lfFile, lfBuffer, i-1, MPI_CHAR, &lfStatus);
+  lfBuffer[i] = ' ';
+  
+  lfBuffer[lfChunkLen-1] = '\n';
+  lfBuffer[lfChunkLen] = '\0';
+  
+  MPI_File_seek(lfFile, lfPos * lfChunkLen * lfRank, MPI_SEEK_SET);
+
+  printf("%d/%d set lfPos to %d.\n", lfRank, lfSize, lfPos);
+
+  MPI_File_write(lfFile, lfBuffer, lfChunkLen, MPI_CHAR, &lfStatus);
+
+  lfPos += 1;
 
   printf("%d/%d did some serious log file writing.\n", lfRank+1, lfSize);
 
