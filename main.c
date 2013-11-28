@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
 
   int size, rank, rc, root=0;
 
-  MPI_File configFile;
+  MPI_File configFile = malloc(sizeof configFile);
   MPI_Info info;
   char *configFileName = "~/ELEVATOR/configFile.txt";
 
@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
   rc = MPI_File_open(MPI_COMM_WORLD, configFileName,
                      MPI_MODE_RDONLY, info, &configFile);
 
-  printf("%d/%d achieved the file_open result: %d", rank+1, size, rc);
+  printf("%d/%d achieved the file_open result: %d.\n", rank+1, size, rc);
 
   // Set the individual pointer to 0
   rc = MPI_File_seek(configFile, 0, MPI_SEEK_SET);
