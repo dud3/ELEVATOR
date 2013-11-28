@@ -104,6 +104,7 @@ int main(int argc, char **argv) {
   rc = MPI_File_open(MPI_COMM_WORLD, configFileName,
                      MPI_MODE_RDONLY, info, &configFile);
 
+  MPI_Status status;
   rc = MPI_File_read_ordered(configFile, buf, 1, MPI_CHAR, &status);
 
   rc = MPI_File_close(&configFile);
