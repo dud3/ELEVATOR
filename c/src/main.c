@@ -122,7 +122,6 @@ void master(int rank) {
 		}
 
         dumpLog(0, 1, "", " is now on floor ", floor);
-
 		printf("elevator now on floor %d\n", floor);
 		//tell workers what floor we're on
 		MPI_Bcast(&floor, 1, MPI_INT, rank, MPI_COMM_WORLD);
