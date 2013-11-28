@@ -9,10 +9,6 @@
 
 module add java
 
-# Number of documents in corpus: must be specified here to get correct
-# TF-IDF values!
-export GBP_CORPUS=1
-
 ### Run the myHadoop environment script to set the appropriate variables
 #
 # Note: ensure that the variables are set correctly in bin/setenv.sh
@@ -23,7 +19,7 @@ export GBP_CORPUS=1
 # required by Hadoop - all config files will be picked up from here
 #
 # Make sure that this is accessible to all nodes
-export HADOOP_CONF_DIR="${HOME}/gutenberg-preprocessor-config"
+export HADOOP_CONF_DIR="${HOME}/elevato-config"
 
 #### Set up the configuration
 # Make sure number of nodes is the same as what you have requested from PBS
@@ -47,11 +43,11 @@ $HADOOP_HOME/bin/start-all.sh
 echo
 
 #### Run your jobs here
-echo "Preprocessing Gutenberg"
+echo "Cooking potatoes"
 $HADOOP_HOME/bin/hadoop --config $HADOOP_CONF_DIR dfs -mkdir gbp-inputs
-$HADOOP_HOME/bin/hadoop --config $HADOOP_CONF_DIR dfs -copyFromLocal ~/dist/*.zip gbp-inputs
+$HADOOP_HOME/bin/hadoop --config $HADOOP_CONF_DIR dfs -copyFromLocal ~/dist/*.zip elevato-inputs
 $HADOOP_HOME/bin/hadoop --config $HADOOP_CONF_DIR dfs -ls gbp-inputs
-$HADOOP_HOME/bin/hadoop --config $HADOOP_CONF_DIR jar ~/dist/gutenberg-preprocessor.jar $GBP_CORPUS
+$HADOOP_HOME/bin/hadoop --config $HADOOP_CONF_DIR jar ~/dist/hpc-elevato-potato.jar
 $HADOOP_HOME/bin/hadoop --config $HADOOP_CONF_DIR dfs -ls gbp-outputs
 #$HADOOP_HOME/bin/hadoop --config $HADOOP_CONF_DIR dfs -copyToLocal gbp-outputs ${HOME}/gutenberg-preprocessor-outputs
 echo
