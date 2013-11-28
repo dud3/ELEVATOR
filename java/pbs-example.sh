@@ -45,7 +45,7 @@ echo
 #### Run your jobs here
 echo "Cooking potatoes"
 $HADOOP_HOME/bin/hadoop --config $HADOOP_CONF_DIR dfs -mkdir gbp-inputs
-$HADOOP_HOME/bin/hadoop --config $HADOOP_CONF_DIR dfs -copyFromLocal ~/dist/*.zip elevato-inputs
+$HADOOP_HOME/bin/hadoop --config $HADOOP_CONF_DIR dfs -copyFromLocal ~/dist/*.txt elevato-inputs
 $HADOOP_HOME/bin/hadoop --config $HADOOP_CONF_DIR dfs -ls gbp-inputs
 $HADOOP_HOME/bin/hadoop --config $HADOOP_CONF_DIR jar ~/dist/hpc-elevato-potato.jar
 $HADOOP_HOME/bin/hadoop --config $HADOOP_CONF_DIR dfs -ls gbp-outputs
