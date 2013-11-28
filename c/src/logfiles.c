@@ -43,7 +43,8 @@ void dumpLog(int whoAreWe, int ourID, char* name, char* msg, int floor) {
   time_t lfTime;
   time(&lfTime); 
 
-  lfBuffer = strcat(strcat(strcpy(lfBuffer, "["), ctime(&lfTime)), "] ");
+  char *newBuffer;
+  newBuffer = strcat(strcat(strcpy(lfBuffer, "["), ctime(&lfTime)), "] ");
 
   char const lfDigit[] = "0123456789";
   char *strID = "0";
@@ -52,13 +53,13 @@ void dumpLog(int whoAreWe, int ourID, char* name, char* msg, int floor) {
   floorID[0] = lfDigit[floor];
 
   if (whoAreWe == 0) {
-    lfBuffer = strcat(strcat(lfBuffer, "Elevator "), strID);
+    newBuffer = strcat(strcat(newBuffer, "Elevator "), strID);
   } else {
-    lfBuffer = strcat(strcat(lfBuffer, "Person "), strID);
-    lfBuffer = strcat(strcat(strcat(lfBuffer, " ("), name), ")");
+    newBuffer = strcat(strcat(newBuffer, "Person "), strID);
+    newBuffer = strcat(strcat(strcat(newBuffer, " ("), name), ")");
   }
 
-  lfBuffer = strcat(strcat(strcat(lfBuffer, msg), floorID), ".\n");
+  strcat(strcat(strcat(newBuffer, msg), floorID), ".\n");
   
   int i = 0;
   
