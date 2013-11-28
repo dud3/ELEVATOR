@@ -84,7 +84,7 @@ void Floor(int rank, MPI_Comm comm) {
 
 int main(int argc, char **argv) {
 
-  int size, rank, rc, root=0;
+  int size, rank, rc, root = 0, nameLength = 20;
 
   MPI_Status status;
   MPI_File configFile = malloc(sizeof configFile);
@@ -100,24 +100,24 @@ int main(int argc, char **argv) {
 
   printf("%d/%d started.\n", rank+1, size);
 
-  char buf[21];
+  char buf[nameLength + 1];
 
   rc = MPI_File_open(MPI_COMM_WORLD, configFileName,
                      MPI_MODE_RDONLY, info, &configFile);
 
   printf("%d/%d achieved the file_open result: %d.\n", rank+1, size, rc);
 
-  // Set the individual pointer to 0
-  rc = MPI_File_seek(configFile, 0, MPI_SEEK_SET);
+  // set the individual pointer to our position in the config file
+  rc = MPI_File_seek(configFile, rank * nameLength, MPI_SEEK_SET);
  
-  rc = MPI_File_read(configFile, buf, 20, MPI_CHAR, &status);
-  buf[20] = '\0';
+  rc = MPI_File_read(configFile, buf, nameLength, MPI_CHAR, &status);
+  buf[nameLength] = '\0';
 
   rc = MPI_File_close(&configFile);
 
   char *ourname = buf;
 
-  char str[100];
+  char str[50 + nameLength];
   printf(strcat (strcat (strcpy (str, "%d/%d has the name '"), ourname), "'.\n"), rank+1, size);
 
   // we check whether or not we are the root process
