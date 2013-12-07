@@ -7,7 +7,7 @@
 #include <math.h>
 #include <string.h>
 
-int lfChunkLen = 100, lfSize, lfRank, lfPos = 0;
+int lfChunkLen = 80, lfSize, lfRank, lfPos = 0;
 MPI_Status lfStatus;
 MPI_File lfFile;
 MPI_Info lfInfo;
@@ -83,7 +83,7 @@ void dumpLog(int whoAreWe, int ourID, char* name, char* msg, int floor) {
   lfBuffer[lfChunkLen-1] = '\n';
   lfBuffer[lfChunkLen] = '\0';
   
-  MPI_File_seek(lfFile, lfPos * lfChunkLen * lfRank, MPI_SEEK_SET);
+  MPI_File_seek(lfFile, (lfPos * lfSize + lfRank) * lfChunkLen, MPI_SEEK_SET);
 
   printf("%d/%d set lfPos to %d.\n", lfRank, lfSize, lfPos);
 

@@ -151,12 +151,12 @@ void worker(int rank, char* name) {
 		MPI_Bcast(&floorOfElevator, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
 		if (state == Elevator) {
-            dumpLog(1, rank, name, " is riding the elevator to floor ", desiredFloor);
+            dumpLog(1, rank, name, " is on the elevator to floor ", desiredFloor);
 			printf("%d is riding the elevator to floor %d\n", rank, desiredFloor);
 			
 			//are we on the right floor? if so, state becomes work
 			if (floorOfElevator == desiredFloor) {
-                dumpLog(1, rank, name, " got off elevator and is now working on floor ", desiredFloor);
+                dumpLog(1, rank, name, " got off the elevator on floor ", desiredFloor);
 				printf("%d got off elevator and is now working on floor %d\n", rank, desiredFloor);
 				state = Work;
 				myFloor = desiredFloor;
@@ -179,10 +179,10 @@ void worker(int rank, char* name) {
 			}
 		}
 		else if (state == Waiting) {
-            dumpLog(1, rank, name, " is waiting for the elevator to go to floor ", desiredFloor);
+            dumpLog(1, rank, name, " waits before going to floor ", desiredFloor);
 			printf("%d is waiting for the elevator to go to floor %d from floor %d\n", rank, desiredFloor, myFloor);
 			if (floorOfElevator == myFloor) {
-                dumpLog(1, rank, name, " got on the elevator to go to floor ", desiredFloor);
+                dumpLog(1, rank, name, " got on the elevator to floor ", desiredFloor);
 				printf("%d got on the elevator to go to floor %d\n", rank, desiredFloor);
 				state = Elevator;
 			}
