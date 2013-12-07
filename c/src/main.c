@@ -91,7 +91,7 @@ int main(int argc, char **argv) {
 const int MAX_FLOOR = 3;
 
 void master(int rank) {
-	srand(time(NULL));
+	srand(time(NULL) + rank);
 	
 	//master manages elevators
 	int floor = 1;
@@ -121,8 +121,8 @@ void master(int rank) {
 			}
 		}
 
-        dumpLog(0, 1, "", " is now on floor ", floor);
-		printf("elevator now on floor %d\n", floor);
+        dumpLog(0, 1, "", " now passes floor ", floor);
+		printf("elevator now passes floor %d\n", floor);
 		//tell workers what floor we're on
 		MPI_Bcast(&floor, 1, MPI_INT, rank, MPI_COMM_WORLD);
 		
@@ -136,7 +136,7 @@ void master(int rank) {
  * Rank is processor number, name is the name of the person toiling away.
  */
 void worker(int rank, char* name) {
-	srand(time(NULL));
+	srand(time(NULL) + rank);
 	
 	int workTicks = rand_num(5);
 	int currWorkTick = 0;
@@ -174,7 +174,10 @@ void worker(int rank, char* name) {
 				printf("%d is done with work on floor %d\n", rank, myFloor);
 				currWorkTick = 0;
 				workTicks = rand_num(5);
-				desiredFloor = rand_num(3);
+				desiredFloor = myFloor;
+				while (desiredFloor == myFloor) {
+					desiredFloor = rand_num(3);
+				}
 				state = Waiting;
 			}
 		}

@@ -85,13 +85,9 @@ void dumpLog(int whoAreWe, int ourID, char* name, char* msg, int floor) {
   
   MPI_File_seek(lfFile, (lfPos * lfSize + lfRank) * lfChunkLen, MPI_SEEK_SET);
 
-  printf("%d/%d set lfPos to %d.\n", lfRank, lfSize, lfPos);
-
   MPI_File_write(lfFile, lfBuffer, lfChunkLen, MPI_CHAR, &lfStatus);
 
   lfPos += 1;
-
-  printf("%d/%d did some serious log file writing.\n", lfRank+1, lfSize);
 
 }
 
