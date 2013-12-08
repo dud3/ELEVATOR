@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include "mpi.h"
 #include <stdio.h>
 #include <stdbool.h>
@@ -8,6 +9,29 @@
 #include <string.h>
 #include "main.h"
 #include "logfiles.h"
+#include "dlist.h"
+
+//map-reduce:
+/*
+  master currently sends out the floor of the elevator.
+  the children need to calculate what line of the file to read, and then
+  count the words on that line. basically whenever we are doing work,
+  we count the words in the file. each thing of work is just
+  one line count, no need for work ticks. it's easy to log words in the
+  file, but harder to combine them. guess we'll just skip that part...
+
+  to calculate lines to read, we need max # of nodes. each child will keep
+  track of the line it's supposed to be reading. then each time we add the
+  max # of nodes to the line. so eventually we will read everything. but
+  how do we handle the issue of going past the end of the file?
+
+  the other issue is that c doesn't really have a simple read line api...
+
+  since using mpi i/o to read this file is going to be difficult, instead read
+  in the entire file first. then each processor will query part of the dynamic
+  2d array (i.e. list of lines) and count words! won't read the 10gb file
+  but at least it will be a finished assignment...
+*/
 
 const int SECONDS = 10.0;
 double START;
@@ -73,7 +97,31 @@ int main(int argc, char **argv) {
   char str[50 + nameLength];
   printf(strcat (strcat (strcpy (str, "%d/%d has the name '"), ourname), "'.\n"), rank+1, size);
 
-  // we check whether or not we are the root process
+  //read in the file to be counted, line by line.
+  FILE * fp;
+  char * line = NULL;
+  size_t lineLen = 0;
+  ssize_t read;
+  
+  dlist* list = NULL;
+  int cap = dlist_create(10, &list);
+  printf("cap is %d", cap);
+  
+  fp = fopen(argv[1], "r");
+  if (fp == NULL) {
+	  MPI_Finalize();
+	  exit(EXIT_FAILURE);
+  }
+  
+  while ((read = getline(&line, &lineLen, fp)) != -1) {
+	  printf("Retrieved line of lengt %zu :\n", read);
+	  printf("%s", line);
+  }
+  
+  if (line)
+	  free(line);
+  
+  // we check whether or not we are the root process.
   if (rank == root) {
 	  master(rank);
   }
