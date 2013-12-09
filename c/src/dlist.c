@@ -32,8 +32,6 @@ int dlist_append(dlist **listp, char *str) {
 	//for some reason dereferencing doesn't work.
 	//can't seem to do an intermediate value to make this
 	//code readable... oh well.
-
-	printf("got a list\n");
 	
 	//do we reallocate the list to expand its size?
 	int size = (*listp)->size;
@@ -49,9 +47,7 @@ int dlist_append(dlist **listp, char *str) {
 	(*listp)->list[size] = calloc(len, sizeof(char));
 	strcpy((*listp)->list[size], str);
 	
-	(*listp)->size = size + 1; //apparently this fucks up the cap variable? what.
-	(*listp)->capacity = cap; //why the hell do we need to do this?
-	printf("copied. size is now %d\n", (*listp)->size);
+	(*listp)->size = size + 1;
 	
 	return (*listp)->size;
 }

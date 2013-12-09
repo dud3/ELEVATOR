@@ -128,6 +128,8 @@ int main(int argc, char **argv) {
 
   char* thestring;
 
+
+  printf("capacity is %d\n", list->capacity);
   for (int c = 0; c < 15; c++) {
 	  dlist_get(&list, c, &thestring);
 	  printf("string is: %s\n", thestring);
