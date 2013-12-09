@@ -104,8 +104,23 @@ int main(int argc, char **argv) {
   ssize_t read;
   
   dlist* list = NULL;
-  int cap = dlist_create(10, &list);
-  printf("cap is %d", cap);
+  dlist_create(10, &list);
+  printf("size of list is %d\n", list->size);
+
+  for (int c = 0; c < 5; c++) {
+  	  char buf[5]; //long enough for test + num, e.g. test1
+  	  sprintf(buf, "test%d", c);
+	  printf("cap before call is %d\n", list->capacity);
+	  dlist_append(&list, buf);
+	  printf("cap after call is %d\n", list->capacity);
+  }
+
+  char* thestring;
+
+  for (int c = 0; c < 5; c++) {
+	  dlist_get(&list, c, &thestring);
+	  printf("string is: %s\n", thestring);
+  }
   
   fp = fopen(argv[1], "r");
   if (fp == NULL) {

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "dlist.h"
 
@@ -11,33 +12,51 @@
  */
 
 int dlist_create(int capacity, dlist **listp) {
-	//this crazy line is allocating the list property of the dlist
-	//struct with the size of one char*
-	(*listp)->list = calloc(capacity, sizeof(*((*listp)->list)));
+	//fun fact: if you don't malloc this, the statement that increases
+	//size by 1 in dlist_append will change the value of the "cap"
+	//variable in that function.
+	*listp = (dlist*)malloc(sizeof(struct dlist));
+	(*listp)->list = (char**)calloc(capacity, sizeof(char*));
+	(*listp)->capacity = capacity;
+	(*listp)->size = 0;
 	return capacity;
 }
 
-void dlist_get(dlist **listp, int index, char* str) {
-	//return the string at whatever index. just complex looking
-	//because of the struct.
-	str = *(((*listp)->list) + index);
+void dlist_get(dlist **listp, int index, char **str) {
+	char *value = ((*listp)->list)[index];
+	int len = strlen(value);
+	*str = strcpy(malloc(len), value);
 }
 
-int dlist_append(dlist **listp, char* str) {
-	dlist *list = *listp;
+int dlist_append(dlist **listp, char *str) {
+	//for some reason dereferencing doesn't work.
+	//can't seem to do an intermediate value to make this
+	//code readable... oh well.
 
+	printf("got a list\n");
+	
 	//do we reallocate the list to expand its size?
-	if (list->size > list->capacity) {
-		list->capacity += 10;
-		list->list = realloc(list->list, list->capacity * sizeof (*(list->list)));
+	int size = (*listp)->size;
+	int cap = (*listp)->capacity;
+
+	printf("cap only: %d\n", cap);
+	/*
+	if (size > cap) {
+		(*listp)->capacity += 10;
+		(*listp)->list = realloc((*listp)->list, (*listp)->capacity * sizeof(char**));
 	}
 
-	//add new element to the end of the list
-	list->size++;
-	size_t len = strlen(str);
-	*((list->list) + list->size) = calloc(len, sizeof(char));
+	printf("finished realloc\n");
+	*/
 
-	strcpy(*((list->list) + list->size), str);
+	//add new element to the end of the list
+	int len = strlen(str);
+	(*listp)->list[size] = calloc(len, sizeof(char));
+	strcpy((*listp)->list[size], str);
 	
-	return list->size;
+	(*listp)->size = size + 1; //apparently this fucks up the cap variable? what.
+	(*listp)->capacity = cap; //why the hell do we need to do this?
+	printf("copied. size is now %d\n", (*listp)->size);
+	
+	return (*listp)->size;
 }
