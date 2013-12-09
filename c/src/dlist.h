@@ -17,7 +17,8 @@ typedef struct dlist dlist;
 int dlist_create(int capacity, dlist **listp);
 
 /**
- * Get something from the specified list at the specified index.
+ * Get something from the specified list at the specified index. The returned
+ * value is stored in str.
  */
 void dlist_get(dlist **listp, int index, char **str);
 
