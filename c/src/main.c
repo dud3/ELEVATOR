@@ -22,15 +22,26 @@
 
   to calculate lines to read, we need max # of nodes. each child will keep
   track of the line it's supposed to be reading. then each time we add the
-  max # of nodes to the line. so eventually we will read everything. but
-  how do we handle the issue of going past the end of the file?
-
-  the other issue is that c doesn't really have a simple read line api...
+  max # of nodes to the line. for example:
+    - we have 10 nodes, 100 lines in file.
+	- node 1 reads line 1, 11, 21, etc.
+	- node 2 reads line 2, 12, 22, etc.
+	
+  so eventually we will read everything. but how do we handle the
+  issue of going past the end of the file? we will read in the entire
+  file and query the size of the file, that's how!
 
   since using mpi i/o to read this file is going to be difficult, instead read
-  in the entire file first. then each processor will query part of the dynamic
+  in the entire file first. then each pocessor will query part of the dynamic
   2d array (i.e. list of lines) and count words! won't read the 10gb file
   but at least it will be a finished assignment...
+
+  optimization that should allow 10gb file: main function uses
+  mathematical trickery to only store into memory line that match the
+  ones it should process. so each processor will read the entire file
+  (which will be stupid slow), but they will only store in memory
+  pieces of the file, following the same logic shown above in the
+  example. with enough nodes, becomes possible to read 10gb file.
 */
 
 const int SECONDS = 10.0;
@@ -107,7 +118,7 @@ int main(int argc, char **argv) {
   dlist_create(10, &list);
   printf("size of list is %d\n", list->size);
 
-  for (int c = 0; c < 5; c++) {
+  for (int c = 0; c < 15; c++) {
   	  char buf[5]; //long enough for test + num, e.g. test1
   	  sprintf(buf, "test%d", c);
 	  printf("cap before call is %d\n", list->capacity);
@@ -117,7 +128,7 @@ int main(int argc, char **argv) {
 
   char* thestring;
 
-  for (int c = 0; c < 5; c++) {
+  for (int c = 0; c < 15; c++) {
 	  dlist_get(&list, c, &thestring);
 	  printf("string is: %s\n", thestring);
   }

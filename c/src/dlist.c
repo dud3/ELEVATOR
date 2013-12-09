@@ -38,16 +38,11 @@ int dlist_append(dlist **listp, char *str) {
 	//do we reallocate the list to expand its size?
 	int size = (*listp)->size;
 	int cap = (*listp)->capacity;
-
-	printf("cap only: %d\n", cap);
-	/*
+	
 	if (size > cap) {
 		(*listp)->capacity += 10;
 		(*listp)->list = realloc((*listp)->list, (*listp)->capacity * sizeof(char**));
 	}
-
-	printf("finished realloc\n");
-	*/
 
 	//add new element to the end of the list
 	int len = strlen(str);
