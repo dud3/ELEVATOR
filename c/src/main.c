@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
   }
   
   while ((read = getline(&line, &lineLen, fp)) != -1) {
-	  printf("Retrieved line of lengt %zu :\n", read);
+	  printf("Retrieved line of length %zu :\n", read);
 	  printf("%s", line);
   }
   
