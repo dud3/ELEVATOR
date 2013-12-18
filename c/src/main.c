@@ -264,6 +264,66 @@ void master(int rank) {
     //also possibly dangerous to occupants.
     sleep(3);
   }
+  
+  int size;
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
+  char *tarStr;
+  MPI_Status status;
+  
+  for (int i = 1; i < size; i++) {
+    int len = 1;
+    int val = 1;
+
+    MPI_Recv(&val, 1, MPI_INT, i, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+    while (0 < val) {
+      MPI_Recv(&len, 1, MPI_INT, i, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+      MPI_Recv(&tarStr, len, MPI_CHAR, i, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+
+      struct Bucket *curBuck = firstBuck;
+      struct Bucket *prvBuck = 0;
+            
+      while (curBuck != 0) {
+        if (strcmp(curBuck->key, tarStr) == 0) {
+          // we increase the value of the current bucket
+          curBuck->value = curBuck->value + val;
+                
+          goto foundABucket;
+        }
+              
+        prvBuck = curBuck;
+        curBuck = curBuck->next;
+        if (curBuck == prvBuck) {
+          curBuck = 0;
+        }
+      }
+           
+      struct Bucket *addBuck = malloc(sizeof *addBuck);
+            
+      addBuck->key = strdup(tarStr);
+      addBuck->value = val;
+      addBuck->next = 0;
+            
+      if (firstBuck == 0) {
+        firstBuck = addBuck;
+      } else {
+        prvBuck->next = addBuck;
+      }
+            
+      foundABucket: ;
+
+      MPI_Recv(&val, 1, MPI_INT, i, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+    }
+    
+    printf("Root received all the data from process %d.\n", i);
+  }
+
+  struct Bucket *cuBuck = firstBuck;
+      
+  while (cuBuck != 0) {
+    printf("%s :: %d\n", (*cuBuck).key, (*cuBuck).value);
+        
+    cuBuck = cuBuck->next;
+  }
 }
 
 /**
@@ -294,12 +354,24 @@ void worker(int rank, char* name) {
       stillWorking = 0;
 
       struct Bucket *curBuck = firstBuck;
-            
+      
+      int len = 0;
+      
       while (curBuck != 0) {
-        printf("%d has a bucket for %s with a content of %d\n", rank, (*curBuck).key, (*curBuck).value);
+        // printf("%d has a bucket for %s with a content of %d\n", rank, (*curBuck).key, (*curBuck).value);
+        
+        // We send the key and a value.
+        // Here, the value is a magic number: If the value is zero, then all the buckets have been sent.
+        MPI_Send(&(curBuck->value), 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+        len = strlen(curBuck->key);
+        MPI_Send(&len, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
+        MPI_Send(curBuck->key, len, MPI_CHAR, 0, 0, MPI_COMM_WORLD);
 
         curBuck = curBuck->next;
       }
+
+      len = 0;
+      MPI_Send(&len, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
 
     if (state == Elevator) {
@@ -358,7 +430,7 @@ void worker(int rank, char* name) {
                     // we increase the value of the current bucket by one
                     curBuck->value = curBuck->value + 1;
                 
-                    printf("%d increased a bucket's value for %s\n", rank, curStr);
+                    // printf("%d increased a bucket's value for %s\n", rank, curStr);
 
                     goto foundABucket;
                   }
@@ -372,7 +444,7 @@ void worker(int rank, char* name) {
            
                 struct Bucket *addBuck = malloc(sizeof *addBuck);
             
-                printf("%d added a bucket for %s\n", rank, curStr);
+                // printf("%d added a bucket for %s\n", rank, curStr);
 
                 addBuck->key = strdup(curStr);
                 addBuck->value = 1;
