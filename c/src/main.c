@@ -254,7 +254,7 @@ void master(int rank) {
       printf("The work is done!\n");
     } else {
       dumpLog(0, 1, "", " now passes floor ", floor);
-      printf("elevator now passes floor %d\n", floor);
+      printf("Elevator now passes floor %d\n", floor);
     }
 
     //tell workers what floor we're on
@@ -292,6 +292,14 @@ void worker(int rank, char* name) {
     // all workers indicated no more work, so we abandon what we were doing
     if (floorOfElevator == -1) {
       stillWorking = 0;
+
+      struct Bucket *curBuck = firstBuck;
+            
+      while (curBuck != 0) {
+        printf("%d has a bucket for %s with a content of %d\n", rank, (*curBuck).key, (*curBuck).value);
+
+        curBuck = curBuck->next;
+      }
     }
 
     if (state == Elevator) {
@@ -324,9 +332,7 @@ void worker(int rank, char* name) {
           // actually do some work with thestring, e.g. count the words and put them into bins
         
           // go through the string and write each substring into curStr;
-            
-          //char *curStr;
-          //curStr = malloc(100);
+
           char curStr[] = "012345678901234567890123456789012345678901234567890123456789";
           int inword = 0;
           int curInCurStr = 0;
@@ -337,8 +343,6 @@ void worker(int rank, char* name) {
                 (thestring[curInString] == '\n') ||
                 (thestring[curInString] == '\r')) {
               if (inword) {
-                printf("%d deals with the string %s\n", rank, curStr);
-                
                 inword = 0;
             
                 // for that, we iterate through all buckets to see if there already is an appropriate one,
@@ -348,7 +352,9 @@ void worker(int rank, char* name) {
                 struct Bucket *prvBuck = 0;
             
                 while (curBuck != 0) {
-                  if (curBuck->key == curStr) {
+                  //printf("%d compares %s to %s\n", rank, curStr, curBuck->key);
+
+                  if (strcmp(curBuck->key, curStr) == 0) {
                     // we increase the value of the current bucket by one
                     curBuck->value = curBuck->value + 1;
                 
@@ -357,20 +363,25 @@ void worker(int rank, char* name) {
                     goto foundABucket;
                   }
               
-                  *prvBuck = *curBuck;
+                  prvBuck = curBuck;
                   curBuck = curBuck->next;
+                  if (curBuck == prvBuck) {
+                    curBuck = 0;
+                  }
                 }
            
-                struct Bucket addBuck;
+                struct Bucket *addBuck = malloc(sizeof *addBuck);
             
                 printf("%d added a bucket for %s\n", rank, curStr);
 
-                addBuck.key = curStr;
-                addBuck.value = 1;
-                addBuck.next = 0;
+                addBuck->key = strdup(curStr);
+                addBuck->value = 1;
+                addBuck->next = 0;
             
-                if (prvBuck != 0) {
-                  prvBuck->next = &addBuck;
+                if (firstBuck == 0) {
+                  firstBuck = addBuck;
+                } else {
+                  prvBuck->next = addBuck;
                 }
             
                 foundABucket: ;
