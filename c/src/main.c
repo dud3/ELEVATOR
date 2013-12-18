@@ -209,8 +209,9 @@ void master(int rank) {
   //master manages elevators
   int floor = 1;
   bool up = true;
+  int stillWorking = 1;
   
-  while (true) {
+  while (stillWorking) {
     if (up) {
       //going up
       if (floor + 1 <= MAX_FLOOR) {
@@ -234,8 +235,28 @@ void master(int rank) {
       }
     }
 
-        dumpLog(0, 1, "", " now passes floor ", floor);
-    printf("elevator now passes floor %d\n", floor);
+    int valOne = 1;
+    int redResult = 0;
+    
+    // ask the workers if they still have work to do
+    MPI_Reduce(&valOne, &redResult, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    
+    printf("Reduction result is %d\n", redResult);
+
+    // all workers indicated that no work is left for them
+    if (redResult == 1) {
+
+      // magic number: abandon work!
+      floor = -1;
+      
+      stillWorking = 0;
+
+      printf("The work is done!\n");
+    } else {
+      dumpLog(0, 1, "", " now passes floor ", floor);
+      printf("elevator now passes floor %d\n", floor);
+    }
+
     //tell workers what floor we're on
     MPI_Bcast(&floor, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
@@ -257,10 +278,21 @@ void worker(int rank, char* name) {
   int desiredFloor = myFloor;
   int floorOfElevator = 0;
   enum State state = Work;
+  int stillWorking = 1;
+  int wantstobeWorking = 1;
+  int unusedInt;
   
-  while (true) {
+  while (stillWorking) {
+    // send whether or not we still have work to do
+    MPI_Reduce(&wantstobeWorking, &unusedInt, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD); 
+
     // receive what floor the elevator is on
     MPI_Bcast(&floorOfElevator, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    
+    // all workers indicated no more work, so we abandon what we were doing
+    if (floorOfElevator == -1) {
+      stillWorking = 0;
+    }
 
     if (state == Elevator) {
       dumpLog(1, rank, name, " is on the elevator to floor ", desiredFloor);
@@ -278,18 +310,19 @@ void worker(int rank, char* name) {
       // do work
 
       if (assgn == 2) {
-        // reduce by counting the words on the lines that have been transmitted
-
-        char* thestring;
 
         if (curLine < list->size) {
+
+          // reduce by counting the words on the lines that have been transmitted
+
+          char* thestring;
+
           dlist_get(&list, curLine, &thestring);
           printf("%d works on: %s", rank, thestring);
           curLine++;
             
           // actually do some work with thestring, e.g. count the words and put them into bins
-            
-            
+        
           // go through the string and write each substring into curStr;
             
           //char *curStr;
@@ -351,6 +384,8 @@ void worker(int rank, char* name) {
               curInCurStr++;
             }
           }
+        } else {
+          wantstobeWorking = false;
         }
       }
 
