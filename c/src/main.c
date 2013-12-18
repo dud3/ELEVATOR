@@ -24,9 +24,9 @@
   track of the line it's supposed to be reading. then each time we add the
   max # of nodes to the line. for example:
     - we have 10 nodes, 100 lines in file.
-	- node 1 reads line 1, 11, 21, etc.
-	- node 2 reads line 2, 12, 22, etc.
-	
+  - node 1 reads line 1, 11, 21, etc.
+  - node 2 reads line 2, 12, 22, etc.
+  
   so eventually we will read everything. but how do we handle the
   issue of going past the end of the file? we will read in the entire
   file and query the size of the file, that's how!
@@ -50,13 +50,6 @@ int assgn = 1;
 int curLine = 0;
 dlist* list = NULL;
 
-typedef struct {
-
-  int id;
-  int state;
-
-} Person;
-
 struct Bucket {
 
   char* key;
@@ -70,7 +63,7 @@ struct Bucket *firstBuck = 0;
 enum State { Work, Elevator, Waiting };
 
 int rand_num(int max) {
-	return (rand() % max) + 1;
+  return (rand() % max) + 1;
 }
 
 int main(int argc, char **argv) {
@@ -127,78 +120,78 @@ int main(int argc, char **argv) {
 
   if (fp == NULL) {
       printf("%d/%d did not find a document to count! Switching to assignment part 1.\n", rank+1, size);
-	  assgn = 1;
+    assgn = 1;
   } else {
-	  printf("%d/%d found a document to count. Switching to assignment part 2.\n", rank+1, size);
-	  assgn = 2;
+    printf("%d/%d found a document to count. Switching to assignment part 2.\n", rank+1, size);
+    assgn = 2;
 
       /*
       
       // general idea:
 
-	  char * line = NULL;
-	  size_t lineLen = 0;
-	  ssize_t read;
+    char * line = NULL;
+    size_t lineLen = 0;
+    ssize_t read;
   
-	  dlist* list = NULL;
-	  dlist_create(10, &list);
-	  printf("size of list is %d\n", list->size);
+    dlist* list = NULL;
+    dlist_create(10, &list);
+    printf("size of list is %d\n", list->size);
 
-	  for (int c = 0; c < 15; c++) {
-	  	  char buf[6]; // long enough for test + num, e.g. test1
-	  	  sprintf(buf, "test%d", c);
-		  dlist_append(&list, buf);
-	  }
+    for (int c = 0; c < 15; c++) {
+        char buf[6]; // long enough for test + num, e.g. test1
+        sprintf(buf, "test%d", c);
+      dlist_append(&list, buf);
+    }
 
-	  char* thestring;
+    char* thestring;
 
-	  printf("capacity is %d\n", list->capacity);
-	  for (int c = 0; c < 15; c++) {
-		  dlist_get(&list, c, &thestring);
-		  printf("string is: %s\n", thestring);
-	  }
+    printf("capacity is %d\n", list->capacity);
+    for (int c = 0; c < 15; c++) {
+      dlist_get(&list, c, &thestring);
+      printf("string is: %s\n", thestring);
+    }
 
 
 
-	  while ((read = getline(&line, &lineLen, fp)) != -1) {
-		  printf("Retrieved line of length %zu :\n", read);
-		  printf("%s", line);
-	  }
+    while ((read = getline(&line, &lineLen, fp)) != -1) {
+      printf("Retrieved line of length %zu :\n", read);
+      printf("%s", line);
+    }
   
-	  if (line)
-		  free(line);
+    if (line)
+      free(line);
 
       */
 
-	  char * line = NULL;
-	  size_t lineLen = 0;
-	  ssize_t read;
+    char * line = NULL;
+    size_t lineLen = 0;
+    ssize_t read;
   
-	  dlist_create(10, &list);
+    dlist_create(10, &list);
 
       // go through the lines in the file...
 
-	  int i = 0;
+    int i = 0;
 
-	  while ((read = getline(&line, &lineLen, fp)) != -1) {
-	      i++;
-	      
-	      // ... and map them to the individual worker threads
-	      if (i % (size-1) == rank-1) {
-		    dlist_append(&list, line);
-	      }
-	  }
+    while ((read = getline(&line, &lineLen, fp)) != -1) {
+        i++;
+        
+        // ... and map them to the individual worker threads
+        if (i % (size-1) == rank-1) {
+        dlist_append(&list, line);
+        }
+    }
   
-	  if (line)
-		  free(line);
+    if (line)
+      free(line);
   }
   
   // we check whether or not we are the root process.
   if (rank == root) {
-	  master(rank);
+    master(rank);
   }
   else {
-	  worker(rank, ourname);
+    worker(rank, ourname);
   }
  
   closeLogFile();
@@ -211,124 +204,181 @@ int main(int argc, char **argv) {
 const int MAX_FLOOR = 3;
 
 void master(int rank) {
-	srand(time(NULL) + rank);
-	
-	//master manages elevators
-	int floor = 1;
-	bool up = true;
-	
-	while (true) {
-		if (up) {
-			//going up
-			if (floor + 1 <= MAX_FLOOR) {
-				floor++;
-			}
-			else {
-				//at max floor, now going down.
-				up = false;
-				floor--;
-			}
-		}
-		else {
-			//going down
-			if (floor - 1 >= 1) {
-				floor--;
-			}
-			else {
-				//at ground floor, go back up
-				up = true;
-				floor++;
-			}
-		}
+  srand(time(NULL) + rank);
+  
+  //master manages elevators
+  int floor = 1;
+  bool up = true;
+  
+  while (true) {
+    if (up) {
+      //going up
+      if (floor + 1 <= MAX_FLOOR) {
+        floor++;
+      }
+      else {
+        //at max floor, now going down.
+        up = false;
+        floor--;
+      }
+    }
+    else {
+      //going down
+      if (floor - 1 >= 1) {
+        floor--;
+      }
+      else {
+        //at ground floor, go back up
+        up = true;
+        floor++;
+      }
+    }
 
         dumpLog(0, 1, "", " now passes floor ", floor);
-		printf("elevator now passes floor %d\n", floor);
-		//tell workers what floor we're on
-		MPI_Bcast(&floor, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    printf("elevator now passes floor %d\n", floor);
+    //tell workers what floor we're on
+    MPI_Bcast(&floor, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-		//elevator very fast, only 3 seconds to get in or out
-		//also possibly dangerous to occupants.
-		sleep(3);
-	}
+    //elevator very fast, only 3 seconds to get in or out
+    //also possibly dangerous to occupants.
+    sleep(3);
+  }
 }
 
 /**
  * Rank is processor number, name is the name of the person toiling away.
  */
 void worker(int rank, char* name) {
-	srand(time(NULL) + rank);
-	
-	int workTicks = rand_num(5);
-	int currWorkTick = 0;
-	int myFloor = rand_num(3);
-	int desiredFloor = myFloor;
-	int floorOfElevator = 0;
-	enum State state = Work;
-	
-	while (true) {
-		//receive what floor the elevator is on
-		MPI_Bcast(&floorOfElevator, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  srand(time(NULL) + rank);
+  
+  int workTicks = rand_num(5);
+  int currWorkTick = 0;
+  int myFloor = rand_num(3);
+  int desiredFloor = myFloor;
+  int floorOfElevator = 0;
+  enum State state = Work;
+  
+  while (true) {
+    // receive what floor the elevator is on
+    MPI_Bcast(&floorOfElevator, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-		if (state == Elevator) {
-            dumpLog(1, rank, name, " is on the elevator to floor ", desiredFloor);
-			printf("%d is riding the elevator to floor %d\n", rank, desiredFloor);
-			
-			//are we on the right floor? if so, state becomes work
-			if (floorOfElevator == desiredFloor) {
-                dumpLog(1, rank, name, " got off the elevator on floor ", desiredFloor);
-				printf("%d got off elevator and is now working on floor %d\n", rank, desiredFloor);
-				state = Work;
-				myFloor = desiredFloor;
-			}
-		}
-		else if (state == Work) {
-			//do work
+    if (state == Elevator) {
+      dumpLog(1, rank, name, " is on the elevator to floor ", desiredFloor);
+      printf("%d is riding the elevator to floor %d\n", rank, desiredFloor);
+      
+      // are we on the right floor? if so, state becomes work
+      if (floorOfElevator == desiredFloor) {
+        dumpLog(1, rank, name, " got off the elevator on floor ", desiredFloor);
+        printf("%d got off elevator and is now working on floor %d\n", rank, desiredFloor);
+        state = Work;
+        myFloor = desiredFloor;
+      }
+    }
+    else if (state == Work) {
+      // do work
 
-			if (assgn == 2) {
-			      // reduce by counting the words on the lines that have been transmitted
+      if (assgn == 2) {
+        // reduce by counting the words on the lines that have been transmitted
 
-				  char* thestring;
+        char* thestring;
 
-				  if (curLine < list->size) {
-					  dlist_get(&list, curLine, &thestring);
-					  printf("%d works on: %s\n", rank, thestring);
-					  curLine++;
-					  
-					  // actually do some work with thestring, e.g. count the words and put them into bins
-					  
-					  // for that, we iterate through all buckets to see if there already is an appropriate one,
-					  // and if not, then we add a bucket
-					  
-					  // we increase the value of the current bucket by one
-					  
-				  }
-			}
+        if (curLine < list->size) {
+          dlist_get(&list, curLine, &thestring);
+          printf("%d works on: %s", rank, thestring);
+          curLine++;
+            
+          // actually do some work with thestring, e.g. count the words and put them into bins
+            
+            
+          // go through the string and write each substring into curStr;
+            
+          //char *curStr;
+          //curStr = malloc(100);
+          char curStr[] = "012345678901234567890123456789012345678901234567890123456789";
+          int inword = 0;
+          int curInCurStr = 0;
+    
+          for (int curInString = 0; thestring[curInString] != '\0'; curInString++) {
+            if ((thestring[curInString] == ' ') ||
+                (thestring[curInString] == '\t') ||
+                (thestring[curInString] == '\n') ||
+                (thestring[curInString] == '\r')) {
+              if (inword) {
+                printf("%d deals with the string %s\n", rank, curStr);
+                
+                inword = 0;
+            
+                // for that, we iterate through all buckets to see if there already is an appropriate one,
+                // and if not, then we add a bucket
+            
+                struct Bucket *curBuck = firstBuck;
+                struct Bucket *prvBuck = 0;
+            
+                while (curBuck != 0) {
+                  if (curBuck->key == curStr) {
+                    // we increase the value of the current bucket by one
+                    curBuck->value = curBuck->value + 1;
+                
+                    printf("%d increased a bucket's value for %s\n", rank, curStr);
 
-			currWorkTick++;
-            dumpLog(1, rank, name, " did some work on floor ", myFloor);
-			printf("%d did some work on floor %d [%d/%d]\n", rank, myFloor, currWorkTick, workTicks);
-			
-			//receive our next task and wait for the elevator
-			if (currWorkTick >= workTicks) {
-                dumpLog(1, rank, name, " is done with work on floor ", myFloor);
-				printf("%d is done with work on floor %d\n", rank, myFloor);
-				currWorkTick = 0;
-				workTicks = rand_num(5);
-				desiredFloor = myFloor;
-				while (desiredFloor == myFloor) {
-					desiredFloor = rand_num(3);
-				}
-				state = Waiting;
-			}
-		}
-		else if (state == Waiting) {
-            dumpLog(1, rank, name, " waits before going to floor ", desiredFloor);
-			printf("%d is waiting for the elevator to go to floor %d from floor %d\n", rank, desiredFloor, myFloor);
-			if (floorOfElevator == myFloor) {
-                dumpLog(1, rank, name, " got on the elevator to floor ", desiredFloor);
-				printf("%d got on the elevator to go to floor %d\n", rank, desiredFloor);
-				state = Elevator;
-			}
-		}
-	}
+                    goto foundABucket;
+                  }
+              
+                  *prvBuck = *curBuck;
+                  curBuck = curBuck->next;
+                }
+           
+                struct Bucket addBuck;
+            
+                printf("%d added a bucket for %s\n", rank, curStr);
+
+                addBuck.key = curStr;
+                addBuck.value = 1;
+                addBuck.next = 0;
+            
+                if (prvBuck != 0) {
+                  prvBuck->next = &addBuck;
+                }
+            
+                foundABucket: ;
+                curStr[0] = '\0';
+                curInCurStr = 0;
+              }
+            } else {
+              inword = 1;
+              curStr[curInCurStr] = thestring[curInString];
+              curStr[curInCurStr+1] = '\0';
+              curInCurStr++;
+            }
+          }
+        }
+      }
+
+      currWorkTick++;
+      dumpLog(1, rank, name, " did some work on floor ", myFloor);
+      printf("%d did some work on floor %d [%d/%d]\n", rank, myFloor, currWorkTick, workTicks);
+      
+      //receive our next task and wait for the elevator
+      if (currWorkTick >= workTicks) {
+        dumpLog(1, rank, name, " is done with work on floor ", myFloor);
+        printf("%d is done with work on floor %d\n", rank, myFloor);
+        currWorkTick = 0;
+        workTicks = rand_num(5);
+        desiredFloor = myFloor;
+        while (desiredFloor == myFloor) {
+          desiredFloor = rand_num(3);
+        }
+        state = Waiting;
+      }
+    }
+    else if (state == Waiting) {
+      dumpLog(1, rank, name, " waits before going to floor ", desiredFloor);
+      printf("%d is waiting for the elevator to go to floor %d from floor %d\n", rank, desiredFloor, myFloor);
+      if (floorOfElevator == myFloor) {
+        dumpLog(1, rank, name, " got on the elevator to floor ", desiredFloor);
+        printf("%d got on the elevator to go to floor %d\n", rank, desiredFloor);
+        state = Elevator;
+      }
+    }
+  }
 }
