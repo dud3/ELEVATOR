@@ -46,6 +46,9 @@
 
 const int SECONDS = 10.0;
 double START;
+int assgn = 1;
+int curLine = 0;
+dlist* list = NULL;
 
 typedef struct {
 
@@ -53,6 +56,16 @@ typedef struct {
   int state;
 
 } Person;
+
+struct Bucket {
+
+  char* key;
+  int value;
+  struct Bucket *next;
+
+};
+
+struct Bucket *firstBuck = 0;
 
 enum State { Work, Elevator, Waiting };
 
@@ -110,44 +123,75 @@ int main(int argc, char **argv) {
 
   //read in the file to be counted, line by line.
   FILE * fp;
-  char * line = NULL;
-  size_t lineLen = 0;
-  ssize_t read;
-  
-  dlist* list = NULL;
-  dlist_create(10, &list);
-  printf("size of list is %d\n", list->size);
-
-  for (int c = 0; c < 15; c++) {
-  	  char buf[5]; //long enough for test + num, e.g. test1
-  	  sprintf(buf, "test%d", c);
-	  printf("cap before call is %d\n", list->capacity);
-	  dlist_append(&list, buf);
-	  printf("cap after call is %d\n", list->capacity);
-  }
-
-  char* thestring;
-
-
-  printf("capacity is %d\n", list->capacity);
-  for (int c = 0; c < 15; c++) {
-	  dlist_get(&list, c, &thestring);
-	  printf("string is: %s\n", thestring);
-  }
-  
   fp = fopen(argv[1], "r");
+
   if (fp == NULL) {
-	  MPI_Finalize();
-	  exit(EXIT_FAILURE);
-  }
+      printf("%d/%d did not find a document to count! Switching to assignment part 1.\n", rank+1, size);
+	  assgn = 1;
+  } else {
+	  printf("%d/%d found a document to count. Switching to assignment part 2.\n", rank+1, size);
+	  assgn = 2;
+
+      /*
+      
+      // general idea:
+
+	  char * line = NULL;
+	  size_t lineLen = 0;
+	  ssize_t read;
   
-  while ((read = getline(&line, &lineLen, fp)) != -1) {
-	  printf("Retrieved line of length %zu :\n", read);
-	  printf("%s", line);
-  }
+	  dlist* list = NULL;
+	  dlist_create(10, &list);
+	  printf("size of list is %d\n", list->size);
+
+	  for (int c = 0; c < 15; c++) {
+	  	  char buf[6]; // long enough for test + num, e.g. test1
+	  	  sprintf(buf, "test%d", c);
+		  dlist_append(&list, buf);
+	  }
+
+	  char* thestring;
+
+	  printf("capacity is %d\n", list->capacity);
+	  for (int c = 0; c < 15; c++) {
+		  dlist_get(&list, c, &thestring);
+		  printf("string is: %s\n", thestring);
+	  }
+
+
+
+	  while ((read = getline(&line, &lineLen, fp)) != -1) {
+		  printf("Retrieved line of length %zu :\n", read);
+		  printf("%s", line);
+	  }
   
-  if (line)
-	  free(line);
+	  if (line)
+		  free(line);
+
+      */
+
+	  char * line = NULL;
+	  size_t lineLen = 0;
+	  ssize_t read;
+  
+	  dlist_create(10, &list);
+
+      // go through the lines in the file...
+
+	  int i = 0;
+
+	  while ((read = getline(&line, &lineLen, fp)) != -1) {
+	      i++;
+	      
+	      // ... and map them to the individual worker threads
+	      if (i % (size-1) == rank-1) {
+		    dlist_append(&list, line);
+	      }
+	  }
+  
+	  if (line)
+		  free(line);
+  }
   
   // we check whether or not we are the root process.
   if (rank == root) {
@@ -200,11 +244,11 @@ void master(int rank) {
         dumpLog(0, 1, "", " now passes floor ", floor);
 		printf("elevator now passes floor %d\n", floor);
 		//tell workers what floor we're on
-		MPI_Bcast(&floor, 1, MPI_INT, rank, MPI_COMM_WORLD);
-		
+		MPI_Bcast(&floor, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
 		//elevator very fast, only 3 seconds to get in or out
 		//also possibly dangerous to occupants.
-		sleep(5);
+		sleep(3);
 	}
 }
 
@@ -218,11 +262,10 @@ void worker(int rank, char* name) {
 	int currWorkTick = 0;
 	int myFloor = rand_num(3);
 	int desiredFloor = myFloor;
+	int floorOfElevator = 0;
 	enum State state = Work;
 	
 	while (true) {
-		int floorOfElevator = 0;
-
 		//receive what floor the elevator is on
 		MPI_Bcast(&floorOfElevator, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
@@ -240,6 +283,27 @@ void worker(int rank, char* name) {
 		}
 		else if (state == Work) {
 			//do work
+
+			if (assgn == 2) {
+			      // reduce by counting the words on the lines that have been transmitted
+
+				  char* thestring;
+
+				  if (curLine < list->size) {
+					  dlist_get(&list, curLine, &thestring);
+					  printf("%d works on: %s\n", rank, thestring);
+					  curLine++;
+					  
+					  // actually do some work with thestring, e.g. count the words and put them into bins
+					  
+					  // for that, we iterate through all buckets to see if there already is an appropriate one,
+					  // and if not, then we add a bucket
+					  
+					  // we increase the value of the current bucket by one
+					  
+				  }
+			}
+
 			currWorkTick++;
             dumpLog(1, rank, name, " did some work on floor ", myFloor);
 			printf("%d did some work on floor %d [%d/%d]\n", rank, myFloor, currWorkTick, workTicks);
