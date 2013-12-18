@@ -267,7 +267,7 @@ void master(int rank) {
   
   int size;
   MPI_Comm_size(MPI_COMM_WORLD, &size);
-  char *tarStr;
+  char tarStr[] = "01234567890123456789012345678901234567890123456789012345678901234567890123456789";
   MPI_Status status;
   
   for (int i = 1; i < size; i++) {
@@ -278,10 +278,11 @@ void master(int rank) {
     while (0 < val) {
       MPI_Recv(&len, 1, MPI_INT, i, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
       MPI_Recv(&tarStr, len, MPI_CHAR, i, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+      tarStr[len] = '\0';
 
       struct Bucket *curBuck = firstBuck;
       struct Bucket *prvBuck = 0;
-            
+      
       while (curBuck != 0) {
         if (strcmp(curBuck->key, tarStr) == 0) {
           // we increase the value of the current bucket
@@ -289,20 +290,20 @@ void master(int rank) {
                 
           goto foundABucket;
         }
-              
+
         prvBuck = curBuck;
         curBuck = curBuck->next;
         if (curBuck == prvBuck) {
           curBuck = 0;
         }
       }
-           
+
       struct Bucket *addBuck = malloc(sizeof *addBuck);
-            
+
       addBuck->key = strdup(tarStr);
       addBuck->value = val;
       addBuck->next = 0;
-            
+
       if (firstBuck == 0) {
         firstBuck = addBuck;
       } else {
@@ -321,6 +322,7 @@ void master(int rank) {
       
   while (cuBuck != 0) {
     printf("%s :: %d\n", (*cuBuck).key, (*cuBuck).value);
+    wordCountLog((*cuBuck).key, (*cuBuck).value);
         
     cuBuck = cuBuck->next;
   }

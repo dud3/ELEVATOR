@@ -99,3 +99,48 @@ void closeLogFile() {
 
 }
 
+void wordCountLog(char* key, int value) {
+
+  // what time is it now?
+  time_t lfTime;
+  time(&lfTime);
+  char lfStrTime[1000];
+  struct tm * p = localtime(&lfTime);
+  strftime(lfStrTime, 1000, "%c", p);
+
+  char lfBuffer[lfChunkLen+1];
+
+  for (int i = 0; i < lfChunkLen; i++) {
+    lfBuffer[i] = ' ';
+  }
+
+  char *newBuffer;
+  newBuffer = strcpy(lfBuffer, "[");
+  newBuffer = strcat(newBuffer, lfStrTime);
+  // newBuffer = strcat(newBuffer, ctime(&lfTime));
+  newBuffer = strcat(newBuffer, "] ");
+
+  char const lfDigit[] = "0123456789";
+  char b[] = "0";
+  char* valID = b;
+  valID[0] = lfDigit[value];
+
+  newBuffer = strcat(strcat(strcat(newBuffer, key), ": "), valID);
+  
+  int i = 0;
+  while (lfBuffer[i] != '\0') {
+    i += 1;
+  }
+  lfBuffer[i] = ' ';
+  
+  lfBuffer[lfChunkLen-1] = '\n';
+  lfBuffer[lfChunkLen] = '\0';
+  
+  MPI_File_seek(lfFile, (lfPos * lfSize + lfRank) * lfChunkLen, MPI_SEEK_SET);
+
+  MPI_File_write(lfFile, lfBuffer, lfChunkLen, MPI_CHAR, &lfStatus);
+
+  lfPos += 1;
+
+}
+
